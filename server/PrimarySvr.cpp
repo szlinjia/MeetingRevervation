@@ -1,3 +1,16 @@
+/*
+Name  :	 PrimarySvr
+Author:  Li Lin
+History: 04/16/2015 created
+Description:
+PrimarySvr class is the sequencer server that makes all
+decision for all replicas. For each write request from replicas, it
+assigns a sequencer number and order all replicas writing. Also, if
+one replica's data has updated, it broadcast all replicas to update
+their local data. The whole system follows CAP theorem and take more
+concern on Availability and Partition. It's a week data consistency.
+*/
+
 #include "PrimarySvr.h"
 
 PrimarySvr::PrimarySvr ()
@@ -14,6 +27,11 @@ PrimarySvr::~PrimarySvr ()
 	}
 }
 
+/*@function:CreateGroupSocket
+  @input: none
+  @output: void
+  @describe:Create a group of socket to all replicas.
+*/
 void PrimarySvr::CreateGroupSocket ()
 {
 	for (int i = 0; i < MAX_DEPT_NUM; i++)
@@ -31,6 +49,14 @@ void PrimarySvr::CreateGroupSocket ()
 	}
 }
 
+
+/*  @function:Broadcast
+	@input:
+	@output: none
+	@describe: After receiving a request from replicas, it assigns each replicas
+	a order number, and broadcast updating data to all replicas.All 
+	the replicas update their local data following this order .
+*/
 void PrimarySvr::Broadcast (void *buf)
 {
 	STMsg *pmsg = (STMsg *)buf;
@@ -58,6 +84,11 @@ void PrimarySvr::Broadcast (void *buf)
 
 }
 
+/*@function:CreateThread
+  @input:none
+  @output:void
+  @describe:Create a thread to receive package from all replicas
+*/
 void PrimarySvr::CreateThread ()
 {
 	printf ("[PrimarySvr::CreateThread]create.\n");
@@ -83,6 +114,12 @@ void PrimarySvr::err (const char *s)
 	exit (1);
 }
 
+/*@function: RecivingPkg
+  @input: the instance pointer of PrimarySvr
+  @output:NULL
+  This is thread running body.It keeps listening from its port
+  the receiving package from replicas. 
+*/
 void* PrimarySvr::RecivingPkg (void *context)
 {
 	struct sockaddr_in my_addr, cli_addr;

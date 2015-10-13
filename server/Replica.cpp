@@ -1,3 +1,15 @@
+/*
+Name  :	 Replica
+Author:  Li Lin
+History: 04/16/2015 created
+Description:
+Replica class is an end server that owns its local data. In this mechanism, even
+other Replica server crash or sequencer server crash, it still works. So it satisfies
+CAP's partition condition. For each time when Replica needs to update, it sends a 
+request to sequencer server and wait for its reply. After getting reply, it will update
+its local data in order.
+*/
+
 #include "Replica.h"
 #include "Commen.h"
 #include <pthread.h>
@@ -14,6 +26,13 @@ static const char* szDays[] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Fr
 
 pthread_mutex_t lock;
 
+/*
+	@function:Replica
+	@input: uID: its own id
+			szUIIP: the client ip to receive replica's local data
+	@output:none
+	@describe:
+*/
 Replica::Replica (unsigned int uID, const char *szUIIP)
 {
 	m_curID = uID;
@@ -210,6 +229,12 @@ void Replica::PrintTotalOrder ()
 	
 }
 
+/*
+	@function:UpdateData
+	@input:none
+	@output: void
+	@describe: Create a thread to receive update information from sequencer server
+*/
 void Replica::UpdateData ()
 {
 	pthread_t tid;
@@ -222,8 +247,13 @@ void Replica::UpdateData ()
 	int ret = pthread_create (&tid, NULL, onUpdateThread, (void *)this);
 }
 
-
-//check each time, if current timestamp at the front of queue, modify replica data
+/*
+	@function:onUpdateThread
+	@input:The instance pointer of replica
+	@output:NULL
+	@describe: Replicas will receive a batch update data from sequencer server.
+	It keeps its local data in the order from sequence assign
+*/
 void* Replica::onUpdateThread (void* paramer)
 {
 	Replica* pobj = (Replica *)paramer;

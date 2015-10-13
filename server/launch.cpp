@@ -1,3 +1,11 @@
+/*
+Name  :	 lauch.cpp
+Author:  Li Lin
+History: 04/16/2015 created
+Description:
+This is an entry of Replica system.It starts all replicas and assign an ID for them.
+
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
